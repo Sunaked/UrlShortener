@@ -13,9 +13,11 @@ import (
 func main() {
 	mux := defaultMux()
 	pathToYAMLFile := flag.String("yml", "", "parses yaml file and appends http.Handler to work with them also")
-
-	_ = pathToYAMLFile
+	pathToJSONFile := flag.String("json", "", "parse JSON file and appends http.Handler to work with them also")
 	flag.Parse()
+	_ = pathToYAMLFile
+	_ = pathToJSONFile
+
 	// Build the MapHandler using the mux as the fallback
 	pathsToUrls := map[string]string{
 		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
@@ -27,7 +29,20 @@ func main() {
 
 	if *pathToYAMLFile != "" {
 		file, err := os.ReadFile(*pathToYAMLFile)
+		if err != nil {
+			panic(err)
+		}
 		mapHandler, err = urlshort.YAMLHandler([]byte(file), mapHandler)
+		if err != nil {
+			panic(err)
+		}
+	}
+	if *pathToJSONFile != "" {
+		file, err := os.ReadFile(*pathToJSONFile)
+		if err != nil {
+			panic(err)
+		}
+		mapHandler, err = urlshort.JSONHandler(file, mapHandler)
 		if err != nil {
 			panic(err)
 		}
