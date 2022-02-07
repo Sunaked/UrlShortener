@@ -54,8 +54,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("parsePostgresDB")
-
 	}
 
 	fmt.Println("Starting the server on :8080")

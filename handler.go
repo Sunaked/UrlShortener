@@ -2,7 +2,6 @@ package urlshort
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	shortener "example.com/URLShortener/shortener"
@@ -50,7 +49,6 @@ func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(parsedYAMLMap)
 	return MapHandler(parsedYAMLMap, fallback), nil
 
 }
