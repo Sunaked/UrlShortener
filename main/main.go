@@ -12,11 +12,13 @@ import (
 
 func main() {
 	mux := defaultMux()
-	pathToYAMLFile := flag.String("yml", "", "parses yaml file and appends http.Handler to work with them also")
-	pathToJSONFile := flag.String("json", "", "parse JSON file and appends http.Handler to work with them also")
+	parseYAMLFile := flag.String("yml", "", "parses yaml file and appends http.Handler to work with them also")
+	parseJSONFile := flag.String("json", "", "parse JSON file and appends http.Handler to work with them also")
+	parsePostgresDB := flag.Bool("pg", false, "parse Postgres database and return long URL after gettign short URL")
 	flag.Parse()
-	_ = pathToYAMLFile
-	_ = pathToJSONFile
+	_ = parseYAMLFile
+	_ = parseJSONFile
+	_ = parsePostgresDB
 
 	// Build the MapHandler using the mux as the fallback
 	pathsToUrls := map[string]string{
@@ -26,9 +28,9 @@ func main() {
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
-
-	if *pathToYAMLFile != "" {
-		file, err := os.ReadFile(*pathToYAMLFile)
+	var err error
+	if *parseYAMLFile != "" {
+		file, err := os.ReadFile(*parseYAMLFile)
 		if err != nil {
 			panic(err)
 		}
@@ -37,8 +39,8 @@ func main() {
 			panic(err)
 		}
 	}
-	if *pathToJSONFile != "" {
-		file, err := os.ReadFile(*pathToJSONFile)
+	if *parseJSONFile != "" {
+		file, err := os.ReadFile(*parseJSONFile)
 		if err != nil {
 			panic(err)
 		}
@@ -46,6 +48,14 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+	}
+	if *parsePostgresDB {
+		mapHandler, err = urlshort.PostgresHandler(mapHandler)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("parsePostgresDB")
+
 	}
 
 	fmt.Println("Starting the server on :8080")

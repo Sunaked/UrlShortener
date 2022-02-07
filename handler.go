@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	shortener "example.com/URLShortener/shortener"
+
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -56,6 +58,31 @@ func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 type jsn struct {
 	Path string
 	URL  string
+}
+
+//PostgresHandler do the same as the other ones, but with postgresql base
+func PostgresHandler(fallback http.HandlerFunc) (http.HandlerFunc, error) {
+	URLsShort := map[string]string{"/vk": "https://vk.com/im?peers=194134042", "/stock": "https://ru.tradingview.com/chart/CPNxT7rI/?symbol=NYSE%3ANEE", "/timetable": "https://webservices.mirea.ru/upload/iblock/e38/2cu5la01h6zeg1la9upv0o4fphvt3izu/ИИИ_2 курс_21-22_весна.xlsx"}
+
+	connStr := "user=alex password=222"
+
+	//dataBase preparation
+	shorten := shortener.NewURLShortenerDB(connStr)
+	err := shorten.CreateTable()
+	if err != nil {
+		return nil, err
+	}
+	//Information(data) preparation(insertion)
+	err = shorten.InsertLongShortData(URLsShort)
+	if err != nil {
+		return nil, err
+	}
+	parsedDB, err := shorten.GetLongURLList()
+	if err != nil {
+		return nil, err
+	}
+	// shortener.String()
+	return MapHandler(parsedDB, fallback), nil
 }
 
 // JSONHandler will parse the provided JSON and return
